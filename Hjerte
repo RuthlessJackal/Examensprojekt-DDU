@@ -1,0 +1,137 @@
+class Hjerte
+{
+float puls;
+float diaTryk;
+float sysTryk;
+PVector pos;
+
+
+
+
+
+
+//animering
+float scalingFactor = 1.3;
+float r = 100;
+float t;
+boolean animate = false;
+boolean animate2 = false;
+int animationFrames = 10;
+int animation2Frames = 3;
+
+ArrayList<Stof> stoffer = new ArrayList<Stof>();
+
+  public Hjerte(PVector pos)
+  {
+    puls = 80;
+    diaTryk = 80;
+    sysTryk = 120;
+    
+    this.pos = pos;
+    
+    //String navn, String enhed, float vaerdi, float startVaerdi, int orden, float halveringsTid, float cutoff
+    stoffer.add(new Stof("Alkohol", "Genstande", 0, 0, 0, 120*60, 0.1));
+    stoffer.add(new Stof("Nikotin", "IDK", 0, 0, 0, 120*60, 0.1));
+  }
+  
+  void UpdateData()
+  {
+   for(int i = 0; i < stoffer.size(); i++)
+   {
+     stoffer.get(i).tid += 1/60.0;
+     stoffer.get(i).Update();
+    
+    if(stoffer.get(i).vaerdi < stoffer.get(i).cutoff)
+    {
+      stoffer.get(i).vaerdi = 0;
+    }
+    
+    
+   }
+    
+    
+  }
+  
+  void LavIndgreb(Indgreb indgreb)
+  {
+    //check for stofændring indreb
+    for(int i = 0; i < stoffer.size(); i++)
+    {
+      if(stoffer.get(i).navn == indgreb.stofPaavirkning)
+      {
+       //lav indgreb
+       stoffer.get(i).Add(indgreb.tilfoersel);
+        
+      }
+    }
+  }
+  
+  float RoundToDecimalPoints(float x, int n)
+  {
+    float temp = x;
+    temp *= pow(10, n);
+    temp = round(temp);
+    temp /= pow(10, n);
+    return temp;
+  }
+  
+  void Draw()
+  {
+   t += 1;
+   
+   UpdateData();
+   
+   
+   
+   if(t > (1.0/puls)*60*60)
+   {
+    t = 0;
+    animate = true;
+    
+   }
+    
+    if(animate)
+    {
+     if(t>=animationFrames-1)
+     {
+       animate = false;
+       animate2 = true;
+       circle(pos.x, pos.y, r*scalingFactor);
+     }
+     else
+     {
+      circle(pos.x, pos.y, r*(1+(scalingFactor-1)*(t+1)/(animationFrames)));
+      
+     }
+    }
+    else
+    {
+    if(animate2)
+    {
+      if(t>=animationFrames+animation2Frames)
+      {
+        animate2 = false; 
+        circle(pos.x, pos.y, r);
+      }
+      else
+      {
+        circle(pos.x, pos.y, r*(1+(scalingFactor-1)*(animationFrames+animation2Frames-t)/(animation2Frames)));
+        
+      }
+        
+    }
+    else
+    {
+      circle(pos.x, pos.y, r);
+      
+    }
+      
+    }
+    textSize(32);
+    textAlign(CENTER);
+     text(round(puls) + " BPM", pos.x, pos.y + 100);
+     text(RoundToDecimalPoints(diaTryk, 1) + "/" + RoundToDecimalPoints(sysTryk, 1) + " mmHG", pos.x, pos.y + 150);
+    
+  }
+  
+}
