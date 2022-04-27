@@ -1,0 +1,54 @@
+class Knap
+{
+ 
+  PVector dimensions;
+  PVector position;
+  String tekst;
+  color defaultColor = color(255, 255, 255);
+  color activatedColor = color(150, 150, 150);
+  int font = 32;
+  
+  public Knap(String tekst, PVector dimensions, PVector position)
+  {
+    this.dimensions = dimensions;
+    this.position = position;
+    this.tekst = tekst;
+    
+    
+  }
+  
+  public Knap(String tekst, PVector dimensions, PVector position, int font)
+  {
+    this.dimensions = dimensions;
+    this.position = position;
+    this.tekst = tekst;
+    this.font = font;
+    
+  }
+  
+  void Draw(boolean canActivate)
+  {
+    push();
+    
+    if(mouseX>position.x && mouseY>position.y && mouseX<position.x+dimensions.x && mouseY <position.y+dimensions.y && canActivate)
+    {
+      fill(activatedColor);
+    }
+    else
+    {
+      fill(defaultColor); 
+    }
+    rect(position.x, position.y, dimensions.x, dimensions.y);
+    
+    pop();
+    
+    push();
+    textAlign(CENTER);
+    textSize(font);
+    fill(0);
+    text(tekst, position.x+dimensions.x/2, position.y+dimensions.y/2+10);
+    pop();
+  }
+  
+  
+}
