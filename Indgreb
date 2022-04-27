@@ -1,0 +1,17 @@
+class Indgreb
+{
+  String navn;
+  String stofPaavirkning;
+  float tilfoersel;
+  
+  public Indgreb(String navn, String stofPaavirkning, float tilfoersel)
+  {
+    this.navn = navn;
+    this.stofPaavirkning = stofPaavirkning;
+    this.tilfoersel = tilfoersel;
+    
+    
+
+  }
+
+}
