@@ -1,0 +1,243 @@
+
+Hjerte hjerte = new Hjerte(new PVector(650, 200));
+ArrayList<Indgreb> indgreb = new ArrayList<Indgreb>();
+ArrayList<String> infoTekster = new ArrayList<String>();
+ArrayList<Knap> indgrebKnappe = new ArrayList<Knap>();
+
+//indgrebknappe variabler
+PVector knapDimensioner = new PVector(200,100);
+PVector knapSpacing = new PVector(225, 125);
+PVector startKnapPos = new PVector(50, 150);
+
+//Sideskiftknappe variabler
+PVector sideskiftKnapDimensioner = new PVector(knapDimensioner.x+knapSpacing.x,150);
+PVector sideskiftKnapPosition = new PVector(50,600);
+Knap sideskiftKnap;
+
+ArrayList<Preset> Presets = new ArrayList<Preset>();
+
+//Knap info UI variabler
+ArrayList<InfoKnap> infoKnappe = new ArrayList<InfoKnap>();
+PVector infoKnapDimensions = new PVector(25,25);
+int infoKnapSpacing = 10;
+
+
+
+int infoTextFontSize = 32;
+PVector infoTextPos = new PVector(50,50);
+
+//data UI
+PVector dataStartPosition = new PVector(50, 150);
+int dataTextFontSize = 30;
+int dataTextSpacing = 50;
+ArrayList<InfoKnap> dataInfoKnappe = new ArrayList<InfoKnap>();
+int dataInfoKnappeXPos = 50;
+
+ArrayList<String> dataInfoTekster = new ArrayList<String>();
+
+boolean mainSide;
+
+boolean inInfoKnap = false;
+
+String infoTekst = "";
+
+int tidsMultiplier = 1;
+
+//tidsMultiplierUI
+Knap tidsKnap1;
+Knap tidsKnap2;
+
+PVector tidsKnapPos = new PVector(600, 600);
+PVector tidsKnapDimensioner = new PVector(50, 50);
+
+
+void setup()
+{
+  frameRate(60);
+  size(800, 800);
+
+  mainSide = true;
+
+  //initialiser preset
+  //Presets.add(new Preset());
+  
+
+  //Initialiser indgreb (String navn, String stofPaavirkning, float tilfoersel)
+  indgreb.add(new Indgreb("Ryge", "Alkohol", 1));
+  indgreb.add(new Indgreb("Ryge1", "Alkohol", 1));
+  indgreb.add(new Indgreb("Ryge2", "Alkohol", 1));
+  indgreb.add(new Indgreb("Ryge3", "Alkohol", 1));
+  indgreb.add(new Indgreb("Ryge4", "Alkohol", 1));
+  indgreb.add(new Indgreb("Ryge5", "Alkohol", 1));
+
+  infoTekster.add("Knappen simulerer indtagelsen af én \ngenstand alkohol");
+  infoTekster.add("dsdsdsdsd");
+  infoTekster.add("INFOTEKST3");
+  infoTekster.add("INFOTEKST4");
+  infoTekster.add("INFOTEKST5");
+  infoTekster.add("INFOTEKST6");
+
+  dataInfoTekster.add("Knappen simulerer indtagelsen af én \ngenstand alkohol");
+  dataInfoTekster.add("dwasdw");
+
+  //Initialiser knappe
+  for(int i = 0; i < indgreb.size(); i++)
+  {
+    Indgreb a = indgreb.get(i);
+    PVector pos = new PVector(startKnapPos.x, startKnapPos.y);
+    if(i % 2 != 0)
+    {
+      pos.x += knapSpacing.x;
+    }
+    
+    pos.y += knapSpacing.y * (i / 2);
+    
+    indgrebKnappe.add(new Knap(a.navn, knapDimensioner, pos));
+    infoKnappe.add(new InfoKnap(infoTekster.get(i), new PVector(pos.x + knapDimensioner.x-(infoKnapDimensions.x+infoKnapSpacing), pos.y+infoKnapSpacing), infoKnapDimensions));
+  }
+
+    for(int i = 0; i < dataInfoTekster.size(); i++)
+    {
+      dataInfoKnappe.add(new InfoKnap(dataInfoTekster.get(i), new PVector(dataInfoKnappeXPos - infoKnapDimensions.x - 10, dataStartPosition.y + dataTextSpacing * i - infoKnapDimensions.y  ), infoKnapDimensions));
+    }
+
+   sideskiftKnap = new Knap("Info", sideskiftKnapDimensioner, sideskiftKnapPosition);
+}
+
+void draw()
+{
+  clear();
+  hjerte.Draw();
+  sideskiftKnap.Draw(true);
+  
+  
+  
+  
+  
+  if(mainSide)
+  {
+    boolean anyFalse = false;
+  for(int i = 0; i < infoKnappe.size(); i++)
+  {
+      if(mouseX>infoKnappe.get(i).knap.position.x && mouseY>infoKnappe.get(i).knap.position.y && mouseX<infoKnappe.get(i).knap.position.x+infoKnappe.get(i).knap.dimensions.x && mouseY <infoKnappe.get(i).knap.position.y+infoKnappe.get(i).knap.dimensions.y)
+      {
+        //Indenfor infoKnap
+        inInfoKnap = true;
+        anyFalse = true;
+        infoTekst = infoTekster.get(i);
+      }
+  }
+  if(!anyFalse)
+  {
+   inInfoKnap = false;
+   infoTekst = "";
+  }
+    
+    
+    for(int i = 0; i < indgrebKnappe.size(); i++)
+    {
+    indgrebKnappe.get(i).Draw(!inInfoKnap);
+    infoKnappe.get(i).Draw();
+    }
+  }
+  else
+  {
+    for(int i = 0; i < hjerte.stoffer.size(); i++)
+    {
+      push();
+      textAlign(LEFT);
+      textSize(dataTextFontSize);
+      text(hjerte.stoffer.get(i).navn + ": " + RoundToDecimalPoints(hjerte.stoffer.get(i).vaerdi, 3) + " " + hjerte.stoffer.get(i).enhed, dataStartPosition.x, dataStartPosition.y + dataTextSpacing * i);
+      pop();
+      
+      dataInfoKnappe.get(i).Draw();
+    }
+    
+    boolean noButton = true;
+    
+    for(int i = 0; i < dataInfoKnappe.size(); i++)
+    {
+      if(mouseX>dataInfoKnappe.get(i).knap.position.x && mouseY>dataInfoKnappe.get(i).knap.position.y && mouseX<dataInfoKnappe.get(i).knap.position.x+dataInfoKnappe.get(i).knap.dimensions.x && mouseY <dataInfoKnappe.get(i).knap.position.y+dataInfoKnappe.get(i).knap.dimensions.y)
+      {
+        //Indenfor dataInfoKnap        
+        infoTekst = dataInfoTekster.get(i);
+        noButton = false;
+        
+      } 
+    }
+    
+    if(noButton)
+    {
+      infoTekst = "";
+    }
+    
+  }
+  
+  if(infoTekst != "")
+  {
+    push();
+    
+    textAlign(LEFT);
+    textSize(infoTextFontSize);
+    text(infoTekst, infoTextPos.x, infoTextPos.y);
+    
+    pop();
+  }
+   
+}
+
+float RoundToDecimalPoints(float x, int n)
+  {
+    float temp = x;
+    temp *= pow(10, n);
+    temp = round(temp);
+    temp /= pow(10, n);
+    return temp;
+  }
+
+void mouseClicked()
+{
+  if(mainSide)
+  {
+    if(!inInfoKnap)
+    {
+       for(int i = 0; i < indgrebKnappe.size(); i++)
+      {
+        if(mouseX>indgrebKnappe.get(i).position.x && mouseY>indgrebKnappe.get(i).position.y && mouseX<indgrebKnappe.get(i).position.x+indgrebKnappe.get(i).dimensions.x && mouseY <indgrebKnappe.get(i).position.y+indgrebKnappe.get(i).dimensions.y)
+        {
+        //lav indgreb
+        
+        hjerte.LavIndgreb(indgreb.get(i));
+        
+        }
+      }  
+    }
+    
+    if(mouseX>sideskiftKnap.position.x && mouseY>sideskiftKnap.position.y && mouseX<sideskiftKnap.position.x+sideskiftKnap.dimensions.x && mouseY <sideskiftKnap.position.y+sideskiftKnap.dimensions.y)
+      {
+        //skift side
+        
+        mainSide = !mainSide;
+        sideskiftKnap.tekst = "Indgreb";
+      }
+    
+  }
+  else
+  { 
+    if(mouseX>sideskiftKnap.position.x && mouseY>sideskiftKnap.position.y && mouseX<sideskiftKnap.position.x+sideskiftKnap.dimensions.x && mouseY <sideskiftKnap.position.y+sideskiftKnap.dimensions.y)
+      {
+        //skift side
+        
+        mainSide = !mainSide;
+        sideskiftKnap.tekst = "Info";
+      } 
+      
+      
+      
+  }
+  
+  
+  
+  
+  
+}
