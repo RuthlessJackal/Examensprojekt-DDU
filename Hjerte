@@ -1,19 +1,18 @@
 class Hjerte
 {
+  
+  float hvilePuls;
+  float hvileSys;
+  float hvileDia;
+  
 float puls;
 float diaTryk;
 float sysTryk;
 PVector pos;
 
-
-
-
-
-
 //animering
 float scalingFactor = 1.3;
 float r = 100;
-float t;
 boolean animate = false;
 boolean animate2 = false;
 int animationFrames = 10;
@@ -21,24 +20,55 @@ int animation2Frames = 3;
 
 ArrayList<Stof> stoffer = new ArrayList<Stof>();
 
-  public Hjerte(PVector pos)
+PShape s;
+
+boolean loeber;
+float loebeTimer;
+float loebeYPuls;
+
+float efterLoebTimer;
+
+boolean sysDiaLoeb;
+
+  public Hjerte(PVector pos, float hvilePuls, float hvileSys, float hvileDia)
   {
+    s = loadShape("heart2.obj");
+    
     puls = 80;
-    diaTryk = 80;
-    sysTryk = 120;
+    diaTryk = 70;
+    sysTryk = 110;
     
     this.pos = pos;
     
-    //String navn, String enhed, float vaerdi, float startVaerdi, int orden, float halveringsTid, float cutoff
-    stoffer.add(new Stof("Alkohol", "Genstande", 0, 0, 0, 120*60, 0.1));
-    stoffer.add(new Stof("Nikotin", "IDK", 0, 0, 0, 120*60, 0.1));
-  }
+//String navn, String enhed, float vaerdi, int orden, float k, float cutoff
+    stoffer.add(new Stof("Alkohol", "Genstande", 0, 0, (1/2.0)/(60*60), 0.01));
+    stoffer.add(new Stof("Nikotin", "Cigaretter", 0, 1, log(2)/(2*60*60), 0.01));
+
+    loeber = false;
+    loebeTimer = 0;
+    
+    sysDiaLoeb = false;
+    
+    efterLoebTimer = 0;
+    
+    this.hvilePuls = hvilePuls;
+    this.hvileSys = hvileSys;
+    this.hvileDia = hvileDia;
+}
   
-  void UpdateData()
+  void UpdateData(float multiplier)
   {
+    
+    loebeTimer += multiplier / 30;   
+    
+    if(!loeber && sysDiaLoeb)
+    {
+     efterLoebTimer += multiplier / 30; 
+    }
+    
    for(int i = 0; i < stoffer.size(); i++)
    {
-     stoffer.get(i).tid += 1/60.0;
+     stoffer.get(i).tid += (1/30.0) * multiplier;
      stoffer.get(i).Update();
     
     if(stoffer.get(i).vaerdi < stoffer.get(i).cutoff)
@@ -48,8 +78,143 @@ ArrayList<Stof> stoffer = new ArrayList<Stof>();
     
     
    }
+
+
+  puls = GetPuls();
+  sysTryk = GetSys();
+  diaTryk = GetDia();
+
+  }
+  
+  float GetSys()
+  {
+  float tempV = 0;
+  
+  tempV += (182.41)/(1+0.66*exp(-0.13*stoffer.get(1).vaerdi)) - hvileSys;
+  
+  if(tempV < 0)
+  {
+   tempV = 0; 
+  }
+  
+  //loeb
+  
+  float aNed = 1.5;
+  float aOp = 1/8.0;
+  
+  if(sysDiaLoeb)
+  {
+    if(efterLoebTimer < 10*60) //På vej ned
+    {
+      tempV -= (efterLoebTimer / 60.0) * aNed;
+    }
+    else if(efterLoebTimer <= 260*60) //stille 
+    {
+      tempV -= 10 * aNed;
+    }
+    else if(efterLoebTimer < 380*60) //på vej op
+    {
+      tempV += ((efterLoebTimer / 60.0) - 260) * aOp - (10 * aNed);
+    }
+    else // tilbage til standard
+    {
+      sysDiaLoeb = false;
+      efterLoebTimer = 0;
+      tempV += 0;
+    }
+  }
+
+  
+  
+    return tempV + hvileSys;
     
+  }
+  
+  float GetDia()
+  {
+  float tempV = 0;
+  
+  tempV += (106.77)/(1+0.52*exp(-0.17*stoffer.get(1).vaerdi)) - hvileDia - 0.24342346;
+
+  //loeb
+  
+  float aNed = 0.4;
+  float aOp = 1/30.0;
+  
+  if(sysDiaLoeb)
+  {
+    if(efterLoebTimer < 10*60) //På vej ned
+    {
+      tempV -= (efterLoebTimer / 60.0) * aNed;
+    }
+    else if(efterLoebTimer <= 260*60) //stille 
+    {
+      tempV -= 10 * aNed;
+    }
+    else if(efterLoebTimer < 380*60) //på vej op
+    {
+      tempV += ((efterLoebTimer / 60.0) - 260) * aOp - (10 * aNed);
+    }
+    else // tilbage til standard
+    {
+      sysDiaLoeb = false;
+      efterLoebTimer = 0;
+      tempV += 0;
+    }
+  }
+  
+    return tempV + hvileDia;
     
+  }
+  
+  float StofferPuls() //LAV
+  {
+    float tempV = 0;
+    
+    tempV += stoffer.get(0).vaerdi * 1.5; // Alkohol/Genstande 
+    tempV += -(stoffer.get(1).vaerdi * stoffer.get(1).vaerdi) * 0.53 + 10.67 * stoffer.get(1).vaerdi; // Nikotin/Cigaretter 
+    
+    return tempV;
+  }
+  
+  float GetPuls()
+  {
+    //beregn puls
+  
+    float tempV = StofferPuls();
+    
+    float loebeP;
+    
+    if(loeber)
+    {
+      loebeP = loebeYPuls + (22 / 60.0)*loebeTimer;
+    }
+    else
+    {
+      loebeP = loebeYPuls + (-11 / 60.0)*loebeTimer;
+      
+    }
+      
+      
+      
+      if(loebeP + tempV + hvilePuls > 170)
+      {
+        return 170;
+      }
+      else
+      {
+        if(loebeP > 0)
+        {
+          return hvilePuls + tempV + loebeP;
+        }
+        else
+        {
+         return hvilePuls + tempV;
+        }
+        
+      }
+      
+     
   }
   
   void LavIndgreb(Indgreb indgreb)
@@ -66,6 +231,60 @@ ArrayList<Stof> stoffer = new ArrayList<Stof>();
     }
   }
   
+  void SetLoeb(boolean loeb)
+  {
+    if(loeb)
+    {
+      if(!loeber)
+      {
+
+        OpdaterLoebeInfo();
+        loebeTimer = 0;
+        loeber = true;
+        
+      }
+    }
+    else
+    {
+      if(loeber)
+      {
+        OpdaterLoebeInfo();
+        
+        loebeTimer = 0;
+        loeber = false;
+        sysDiaLoeb = true;
+      }
+    }
+  }
+  
+  void OpdaterLoebeInfo()
+  {
+    if(loeber)
+    {
+      float tempPuls = GetPuls();
+      loebeYPuls = loebeYPuls + (22 / 60.0)*loebeTimer;
+      
+      if(tempPuls >= 170)
+      {
+        loebeYPuls = 170 - (hvilePuls + StofferPuls());
+      }
+    }
+    else
+    {
+      if(loebeYPuls + (-11 / 60.0)*loebeTimer < 0)
+      {
+        loebeYPuls = 0;
+      }
+      else
+      {
+        loebeYPuls = loebeYPuls + (-11 / 60.0)*loebeTimer;
+        
+      }
+      
+      
+    }
+  }
+  
   float RoundToDecimalPoints(float x, int n)
   {
     float temp = x;
@@ -77,60 +296,28 @@ ArrayList<Stof> stoffer = new ArrayList<Stof>();
   
   void Draw()
   {
-   t += 1;
+   UpdateData(tidsMultiplier);
    
-   UpdateData();
-   
-   
-   
-   if(t > (1.0/puls)*60*60)
-   {
-    t = 0;
-    animate = true;
+    push();
     
-   }
+    lights();
+    background(0);
+  
+    camera(pos.x, pos.y, ((height/2.0)-300-pow((sin(radians(frameCount*12*puls/60))+sin(radians(frameCount*12*puls/60)-1.45)*sin(radians(frameCount*12*puls/60))),10)*2.2/(puls/60))-420, pos.x+150, pos.y+100, 0, 0, 1, 0);
+     
+    translate(pos.x, pos.y);
     
-    if(animate)
-    {
-     if(t>=animationFrames-1)
-     {
-       animate = false;
-       animate2 = true;
-       circle(pos.x, pos.y, r*scalingFactor);
-     }
-     else
-     {
-      circle(pos.x, pos.y, r*(1+(scalingFactor-1)*(t+1)/(animationFrames)));
-      
-     }
-    }
-    else
-    {
-    if(animate2)
-    {
-      if(t>=animationFrames+animation2Frames)
-      {
-        animate2 = false; 
-        circle(pos.x, pos.y, r);
-      }
-      else
-      {
-        circle(pos.x, pos.y, r*(1+(scalingFactor-1)*(animationFrames+animation2Frames-t)/(animation2Frames)));
-        
-      }
-        
-    }
-    else
-    {
-      circle(pos.x, pos.y, r);
-      
-    }
-      
-    }
+    stroke(255);
+    noFill();
+    rotateZ(radians(180)); //rotate in the y-axis by passing the radians conversion of 45 degrees
+    rotateY(radians(frameCount)/2);
+   
+    shape(s, 0, 0);
+    pop();
     textSize(32);
     textAlign(CENTER);
      text(round(puls) + " BPM", pos.x, pos.y + 100);
-     text(RoundToDecimalPoints(diaTryk, 1) + "/" + RoundToDecimalPoints(sysTryk, 1) + " mmHG", pos.x, pos.y + 150);
+     text(RoundToDecimalPoints(sysTryk, 1) + "/" + RoundToDecimalPoints(diaTryk, 1) + " mmHG", pos.x, pos.y + 150);
     
   }
   
