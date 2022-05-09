@@ -7,18 +7,18 @@ class Stof
   float startVaerdi;
   float tid;
   int reaktionsOrden;
-  float halveringsTid;
+  float k;
   float cutoff;
   
-  public Stof(String navn, String enhed, float vaerdi, float startVaerdi, int orden, float halveringsTid,float cutoff)
+  public Stof(String navn, String enhed, float vaerdi, int orden, float k,float cutoff)
   {
     this.navn = navn;
     this.enhed = enhed;
     this.vaerdi = vaerdi;
-    this.startVaerdi = startVaerdi;
+    startVaerdi = vaerdi;
     tid = 0;
     reaktionsOrden = orden;
-    this.halveringsTid = halveringsTid;
+    this.k = k;
     this.cutoff = cutoff;
   }
   
@@ -26,22 +26,31 @@ class Stof
   {
     if(reaktionsOrden == 1)
     {
-      float k = log(2)/halveringsTid;
       vaerdi = startVaerdi*exp(k*tid*(-1));
     }
     else if(reaktionsOrden == 0)
     {
-      float k = startVaerdi/(2*halveringsTid);
       vaerdi = -k*tid+startVaerdi;
+      
     }
     
   }
   
   public void Add(float antal)
   {
-    tid = 0;
-    vaerdi += antal;
+    if(vaerdi + antal < 0)
+    {
+      tid = 0;
+    vaerdi = 0;
     startVaerdi = vaerdi;
+    }
+    else
+    {
+     tid = 0;
+    vaerdi += antal;
+    startVaerdi = vaerdi; 
+    }
+    
   }
   
 }
