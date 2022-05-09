@@ -1,17 +1,19 @@
+import de.bezier.data.sql.*;
+SQLite db;
 
-Hjerte hjerte = new Hjerte(new PVector(650, 200));
+Hjerte hjerte;
 ArrayList<Indgreb> indgreb = new ArrayList<Indgreb>();
 ArrayList<String> infoTekster = new ArrayList<String>();
 ArrayList<Knap> indgrebKnappe = new ArrayList<Knap>();
 
 //indgrebknappe variabler
-PVector knapDimensioner = new PVector(200,100);
-PVector knapSpacing = new PVector(225, 125);
-PVector startKnapPos = new PVector(50, 150);
+PVector knapDimensioner = new PVector(250,120);
+PVector knapSpacing = new PVector(300, 160);
+PVector startKnapPos = new PVector(50, 175);
 
 //Sideskiftknappe variabler
-PVector sideskiftKnapDimensioner = new PVector(knapDimensioner.x+knapSpacing.x,150);
-PVector sideskiftKnapPosition = new PVector(50,600);
+PVector sideskiftKnapDimensioner = new PVector(knapDimensioner.x+knapSpacing.x,125);
+PVector sideskiftKnapPosition = new PVector(50,650);
 Knap sideskiftKnap;
 
 ArrayList<Preset> Presets = new ArrayList<Preset>();
@@ -27,7 +29,7 @@ int infoTextFontSize = 32;
 PVector infoTextPos = new PVector(50,50);
 
 //data UI
-PVector dataStartPosition = new PVector(50, 150);
+PVector dataStartPosition = new PVector(50, 200);
 int dataTextFontSize = 30;
 int dataTextSpacing = 50;
 ArrayList<InfoKnap> dataInfoKnappe = new ArrayList<InfoKnap>();
@@ -41,44 +43,82 @@ boolean inInfoKnap = false;
 
 String infoTekst = "";
 
-int tidsMultiplier = 1;
+float tidsMultiplier = 1;
 
 //tidsMultiplierUI
 Knap tidsKnap1;
 Knap tidsKnap2;
 
-PVector tidsKnapPos = new PVector(600, 600);
+PVector tidsKnapPos = new PVector(890, 600);
 PVector tidsKnapDimensioner = new PVector(50, 50);
+float tidsKnapSpacing = 20;
+
+//Genstartknap
+Knap genstartKnap;
+
+PVector genstartKnapPos = new PVector(855, 675);
+PVector genstartKnapDimensioner = new PVector(200, 100);
+
+float hvilePuls = 60;
+
+//kondi knappe
+PVector kondiKnappePos = new PVector(300, 400);
+PVector kondiKnappeDimensioner = new PVector(100, 100);
+
+
 
 
 void setup()
 {
-  frameRate(60);
-  size(800, 800);
+  
+  size(1200, 800, P3D);
 
   mainSide = true;
 
+  hjerte = new Hjerte(new PVector(950, 315), 60, 110, 70);
+
+  //Database kode start...
+  
+  db = new SQLite(this, "HjerteData.sqlite");
+  
+  if(db.connect())
+  {    
+    db.query("SELECT * FROM HjerteData");
+    
+    tidsMultiplier = db.getFloat("TidsMultiplier");
+    hjerte.stoffer.get(0).Add(db.getFloat("Genstande"));
+    hjerte.stoffer.get(1).Add(db.getFloat("Cigaretter"));
+    
+  } 
+ 
+  db.close();
+
+  genstartKnap = new Knap("Genstart", genstartKnapDimensioner, genstartKnapPos);
+
+  //Database kode slut...
+
   //initialiser preset
   //Presets.add(new Preset());
-  
 
-  //Initialiser indgreb (String navn, String stofPaavirkning, float tilfoersel)
-  indgreb.add(new Indgreb("Ryge", "Alkohol", 1));
-  indgreb.add(new Indgreb("Ryge1", "Alkohol", 1));
-  indgreb.add(new Indgreb("Ryge2", "Alkohol", 1));
-  indgreb.add(new Indgreb("Ryge3", "Alkohol", 1));
-  indgreb.add(new Indgreb("Ryge4", "Alkohol", 1));
-  indgreb.add(new Indgreb("Ryge5", "Alkohol", 1));
+  //Inpop();itialiser indgreb (String navn, String stofPaavirkning, float tilfoersel)
+  indgreb.add(new Indgreb("+ Cigaret", "Nikotin", 1));
+  indgreb.add(new Indgreb("- Cigaret", "Nikotin", -1));
+  indgreb.add(new Indgreb("+ Genstand", "Alkohol", 1));
+  indgreb.add(new Indgreb("- Genstand", "Alkohol", -1));
+  indgreb.add(new Indgreb("Start løb", "Alkohol", 1));
+  indgreb.add(new Indgreb("Stop løb", "Alkohol", 1));
 
-  infoTekster.add("Knappen simulerer indtagelsen af én \ngenstand alkohol");
-  infoTekster.add("dsdsdsdsd");
-  infoTekster.add("INFOTEKST3");
-  infoTekster.add("INFOTEKST4");
-  infoTekster.add("INFOTEKST5");
-  infoTekster.add("INFOTEKST6");
+  //infoTekster til indgrebsknapper
+  infoTekster.add("Knappen simulerer rygning af én cigaret.");
+  infoTekster.add("Knappen simulerer fjernelse af én cigaret.");
+  infoTekster.add("Knappen simulerer indtagelsen af én \ngenstand alkohol.");
+  infoTekster.add("Knappen simulerer fjernelse af én \ngenstand alkohol fra blodet.");
+  infoTekster.add("Knappen simulerer at der bliver løbet én tur. \nDer kan klikkes på knappen: 'Stop løb', for at \nstoppe med at løbe.");
+  infoTekster.add("Knappen stopper én løbetur, hvis den \ner i gang og simulerer den proces som \nsker ved afslapning efter cardio træning.");
 
-  dataInfoTekster.add("Knappen simulerer indtagelsen af én \ngenstand alkohol");
-  dataInfoTekster.add("dwasdw");
+  //infoTekster til infosiden
+  dataInfoTekster.add("Der vises hvor meget alkohol, der er i blodet, i \nform af genstande. Alkohol er lineært \naftagende i blodet");
+  dataInfoTekster.add("Der vises hvor meget nikotin, der er i blodet, i \nform af cigaretter. Mængden af nikotin i \nblodet er eksponentielt aftagende.");
 
   //Initialiser knappe
   for(int i = 0; i < indgreb.size(); i++)
@@ -102,6 +142,30 @@ void setup()
     }
 
    sideskiftKnap = new Knap("Info", sideskiftKnapDimensioner, sideskiftKnapPosition);
+
+    tidsKnap1 = new Knap("<", tidsKnapDimensioner, tidsKnapPos);
+    tidsKnap2 = new Knap(">", tidsKnapDimensioner, new PVector(tidsKnapPos.x + tidsKnapDimensioner.x + tidsKnapSpacing, tidsKnapPos.y));
+
+    frameRate(30);
+
+}
+
+void exit() //slet alt fra database, og gem resultatet til sidst.
+{
+  db = new SQLite(this, "HjerteData.sqlite");
+  
+  if(db.connect())
+  {
+    db.execute("DELETE FROM HjerteData");
+ 
+   db.execute("INSERT INTO HjerteData VALUES (" + tidsMultiplier + ", " + hjerte.stoffer.get(0).vaerdi + ", " + hjerte.stoffer.get(1).vaerdi + ")");
+ 
+  }
+  
+  db.close();
+  
+  
+  super.exit();
 }
 
 void draw()
@@ -110,16 +174,21 @@ void draw()
   hjerte.Draw();
   sideskiftKnap.Draw(true);
   
+  genstartKnap.Draw(true);
   
-  
-  
+  push();
+  textAlign(CENTER);
+  text("Tid: x" + tidsMultiplier, tidsKnapPos.x +  + tidsKnapDimensioner.x + tidsKnapSpacing / 2, tidsKnapPos.y - 25);
+  tidsKnap1.Draw(true);
+  tidsKnap2.Draw(true);
+  pop();
   
   if(mainSide)
   {
     boolean anyFalse = false;
   for(int i = 0; i < infoKnappe.size(); i++)
   {
-      if(mouseX>infoKnappe.get(i).knap.position.x && mouseY>infoKnappe.get(i).knap.position.y && mouseX<infoKnappe.get(i).knap.position.x+infoKnappe.get(i).knap.dimensions.x && mouseY <infoKnappe.get(i).knap.position.y+infoKnappe.get(i).knap.dimensions.y)
+      if(OnButton(infoKnappe.get(i).knap))
       {
         //Indenfor infoKnap
         inInfoKnap = true;
@@ -136,7 +205,35 @@ void draw()
     
     for(int i = 0; i < indgrebKnappe.size(); i++)
     {
-    indgrebKnappe.get(i).Draw(!inInfoKnap);
+    if(indgreb.get(i).navn == "Start løb")
+        {
+          if(hjerte.loeber == true)
+          {
+            indgrebKnappe.get(i).permaActivated = true;
+          }
+          else
+          {
+            indgrebKnappe.get(i).permaActivated = false;
+          }
+          
+        }
+            
+        if(indgreb.get(i).navn == "Stop løb")
+        {
+          if(hjerte.loeber == false)
+          {
+            indgrebKnappe.get(i).permaActivated = true;
+          }
+          else
+          {
+            indgrebKnappe.get(i).permaActivated = false;
+          }
+
+        }
+      
+      indgrebKnappe.get(i).Draw(!inInfoKnap);
+    
+    
     infoKnappe.get(i).Draw();
     }
   }
@@ -153,11 +250,19 @@ void draw()
       dataInfoKnappe.get(i).Draw();
     }
     
+    push();
+      textAlign(LEFT);
+      textSize(dataTextFontSize);
+      
+      pop();
+    
+    
+    
     boolean noButton = true;
     
     for(int i = 0; i < dataInfoKnappe.size(); i++)
     {
-      if(mouseX>dataInfoKnappe.get(i).knap.position.x && mouseY>dataInfoKnappe.get(i).knap.position.y && mouseX<dataInfoKnappe.get(i).knap.position.x+dataInfoKnappe.get(i).knap.dimensions.x && mouseY <dataInfoKnappe.get(i).knap.position.y+dataInfoKnappe.get(i).knap.dimensions.y)
+      if(OnButton(dataInfoKnappe.get(i).knap))
       {
         //Indenfor dataInfoKnap        
         infoTekst = dataInfoTekster.get(i);
@@ -195,25 +300,71 @@ float RoundToDecimalPoints(float x, int n)
     return temp;
   }
 
+boolean OnButton(Knap a)
+{
+  if(mouseX>a.position.x && mouseY>a.position.y && mouseX<a.position.x+a.dimensions.x && mouseY <a.position.y+a.dimensions.y)
+  {
+    return true;
+  }
+  
+  return false;
+}
+
 void mouseClicked()
 {
+  if(OnButton(genstartKnap))
+  {
+   //genstart
+   
+   tidsMultiplier = 1;
+   
+   for(int i = 0; i < hjerte.stoffer.size(); i++)
+   {
+    hjerte.stoffer.get(i).Add(-hjerte.stoffer.get(i).vaerdi); 
+   }
+   
+   hjerte.SetLoeb(false);
+   hjerte.loebeYPuls = 0;
+   
+  }
+  
+  
+  if(OnButton(tidsKnap1))
+      {
+        tidsMultiplier /= 2;
+      }
+   if(OnButton(tidsKnap2))
+      {
+        tidsMultiplier *= 2;
+      }  
+  
   if(mainSide)
   {
     if(!inInfoKnap)
     {
        for(int i = 0; i < indgrebKnappe.size(); i++)
       {
-        if(mouseX>indgrebKnappe.get(i).position.x && mouseY>indgrebKnappe.get(i).position.y && mouseX<indgrebKnappe.get(i).position.x+indgrebKnappe.get(i).dimensions.x && mouseY <indgrebKnappe.get(i).position.y+indgrebKnappe.get(i).dimensions.y)
+        if(OnButton(indgrebKnappe.get(i)))
         {
         //lav indgreb
-        
-        hjerte.LavIndgreb(indgreb.get(i));
+        if(indgreb.get(i).navn == "Start løb")
+        {
+          hjerte.SetLoeb(true);
+        }
+        else if(indgreb.get(i).navn == "Stop løb")
+        {
+          hjerte.SetLoeb(false);
+        }
+        else
+        {
+          hjerte.LavIndgreb(indgreb.get(i));
+        }
         
         }
       }  
     }
     
-    if(mouseX>sideskiftKnap.position.x && mouseY>sideskiftKnap.position.y && mouseX<sideskiftKnap.position.x+sideskiftKnap.dimensions.x && mouseY <sideskiftKnap.position.y+sideskiftKnap.dimensions.y)
+    if(OnButton(sideskiftKnap))
       {
         //skift side
         
@@ -224,7 +375,7 @@ void mouseClicked()
   }
   else
   { 
-    if(mouseX>sideskiftKnap.position.x && mouseY>sideskiftKnap.position.y && mouseX<sideskiftKnap.position.x+sideskiftKnap.dimensions.x && mouseY <sideskiftKnap.position.y+sideskiftKnap.dimensions.y)
+    if(OnButton(sideskiftKnap))
       {
         //skift side
         
