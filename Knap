@@ -7,6 +7,7 @@ class Knap
   color defaultColor = color(255, 255, 255);
   color activatedColor = color(150, 150, 150);
   int font = 32;
+  boolean permaActivated;
   
   public Knap(String tekst, PVector dimensions, PVector position)
   {
@@ -14,6 +15,7 @@ class Knap
     this.position = position;
     this.tekst = tekst;
     
+    permaActivated = false;
     
   }
   
@@ -23,6 +25,8 @@ class Knap
     this.position = position;
     this.tekst = tekst;
     this.font = font;
+    
+    permaActivated = false;
     
   }
   
@@ -38,6 +42,12 @@ class Knap
     {
       fill(defaultColor); 
     }
+    
+    if(permaActivated)
+    {
+      fill(activatedColor);
+    }
+    
     rect(position.x, position.y, dimensions.x, dimensions.y);
     
     pop();
