@@ -48,7 +48,7 @@ class Knap
       fill(activatedColor);
     }
     
-    rect(position.x, position.y, dimensions.x, dimensions.y);
+    rect(position.x, position.y, dimensions.x, dimensions.y, 14);
     
     pop();
     
