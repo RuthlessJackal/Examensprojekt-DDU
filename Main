@@ -9,7 +9,7 @@ ArrayList<Knap> indgrebKnappe = new ArrayList<Knap>();
 //indgrebknappe variabler
 PVector knapDimensioner = new PVector(250,120);
 PVector knapSpacing = new PVector(300, 160);
-PVector startKnapPos = new PVector(50, 175);
+PVector startKnapPos = new PVector(50, 200);
 
 //Sideskiftknappe variabler
 PVector sideskiftKnapDimensioner = new PVector(knapDimensioner.x+knapSpacing.x,125);
@@ -29,9 +29,9 @@ int infoTextFontSize = 32;
 PVector infoTextPos = new PVector(50,50);
 
 //data UI
-PVector dataStartPosition = new PVector(50, 200);
+PVector dataStartPosition = new PVector(50, 250);
 int dataTextFontSize = 30;
-int dataTextSpacing = 50;
+int dataTextSpacing = 75;
 ArrayList<InfoKnap> dataInfoKnappe = new ArrayList<InfoKnap>();
 int dataInfoKnappeXPos = 50;
 
@@ -59,23 +59,53 @@ Knap genstartKnap;
 PVector genstartKnapPos = new PVector(855, 675);
 PVector genstartKnapDimensioner = new PVector(200, 100);
 
-float hvilePuls = 60;
-
 //kondi knappe
-PVector kondiKnappePos = new PVector(300, 400);
-PVector kondiKnappeDimensioner = new PVector(100, 100);
+PVector kondiKnappePos = new PVector(50, 210);
+PVector kondiKnappeDimensioner = new PVector(100, 65);
+float kondiKnappeSpacing = 110;
 
+InfoKnap kondiInfoKnap;
+String kondiInfoKnapTekst = "En god kondi svarer til en lavere hvilepuls. Det \nbetyder hjertet ikke skal arbejde så hårdt, så der \ner mindre chance for hjerterelaterede skader.";
 
+Knap kondiDaarligt;
+InfoKnap kondiDaarligtInfo;
+String kondiDaarligtInfoTekst = "Knappen sætter hvilepulsen til at være 80 BPM. \nDette vil typisk være hvilepulsen for en person \nmed dårlig kondi.";
 
+Knap kondiMiddel;
+InfoKnap kondiMiddelInfo;
+String kondiMiddelInfoTekst = "Knappen sætter hvilepulsen til at være 60 BPM. \nDette vil typisk være hvilepulsen for en person \nmed gennemsnitlig kondi.";
+
+Knap kondiGodt;
+InfoKnap kondiGodtInfo;
+String kondiGodtInfoTekst = "Knappen sætter hvilepulsen til at være 40 BPM. \nDette vil typisk være hvilepulsen for en person \nmed god kondi.";
+
+int kondiVaerdi = 1; // 0 == dårlig, 1 == middel, 2 == godt
+
+int daarligKondiPuls = 80; int middelKondiPuls = 60; int godKondiPuls = 40;
+
+PFont font;
+
+InfoKnap BPMInfoKnap;
+InfoKnap MMHGInfoKnap;
+PVector infoKnapDimensioner = new PVector(40, 40);
 
 void setup()
 {
   
   size(1200, 800, P3D);
 
+  font = createFont("comic-sans-ms_[allfont.net].ttf", 20);
+
   mainSide = true;
 
-  hjerte = new Hjerte(new PVector(950, 315), 60, 110, 70);
+  PVector Hjertepos = new PVector(950, 315);
+
+  hjerte = new Hjerte(Hjertepos, 60, 110, 70);
+
+  BPMInfoKnap = new InfoKnap("Her står værdien af pulsen, angivet i enheden BPM. \nBPM står for beats per minute.", new PVector(Hjertepos.x - 110, Hjertepos.y + 68), infoKnapDimensioner);
+  MMHGInfoKnap = new InfoKnap("Her står værdien af blodtrykket: \n(Systolisk)/(Diastolisk). Enheden mmHg er: \nmillimeter kviksølv, og er en måleenhed for tryk.", new PVector(Hjertepos.x - 185, Hjertepos.y + 118), infoKnapDimensioner);
+
+  kondiKnappePos.y += dataStartPosition.y - 190;
 
   //Database kode start...
   
@@ -88,7 +118,7 @@ void setup()
     tidsMultiplier = db.getFloat("TidsMultiplier");
     hjerte.stoffer.get(0).Add(db.getFloat("Genstande"));
     hjerte.stoffer.get(1).Add(db.getFloat("Cigaretter"));
-    
+    kondiVaerdi = db.getInt("Kondi");
   } 
  
   db.close();
@@ -146,6 +176,20 @@ void setup()
     tidsKnap1 = new Knap("<", tidsKnapDimensioner, tidsKnapPos);
     tidsKnap2 = new Knap(">", tidsKnapDimensioner, new PVector(tidsKnapPos.x + tidsKnapDimensioner.x + tidsKnapSpacing, tidsKnapPos.y));
 
+    PVector kondiInfoKnapDimensioner = new PVector(20, 20);
+    PVector kondiInfoKnapOffset = new PVector(3, 3);
+
+    kondiDaarligt = new Knap("Dårlig", kondiKnappeDimensioner, new PVector(kondiKnappePos.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18);
+    kondiDaarligtInfo = new InfoKnap("i", new PVector(kondiKnappePos.x + kondiInfoKnapOffset.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size() + kondiInfoKnapOffset.y), kondiInfoKnapDimensioner);
+    
+    kondiMiddel = new Knap("Middel", kondiKnappeDimensioner, new PVector(kondiKnappePos.x + kondiKnappeSpacing, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18);
+    kondiMiddelInfo = new InfoKnap("i", new PVector(kondiKnappePos.x + kondiKnappeSpacing + kondiInfoKnapOffset.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size() + kondiInfoKnapOffset.y), kondiInfoKnapDimensioner);
+    
+    kondiGodt = new Knap("God", kondiKnappeDimensioner, new PVector(kondiKnappePos.x + kondiKnappeSpacing * 2, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18);
+    kondiGodtInfo = new InfoKnap("i", new PVector(kondiKnappePos.x + kondiKnappeSpacing * 2 + kondiInfoKnapOffset.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size() + kondiInfoKnapOffset.y), kondiInfoKnapDimensioner);
+    
+    kondiInfoKnap = new InfoKnap("i", new PVector(dataInfoKnappeXPos - infoKnapDimensions.x - 10, dataStartPosition.y + dataTextSpacing * dataInfoTekster.size() - infoKnapDimensions.y  ), infoKnapDimensions);
+
     frameRate(30);
 
 }
@@ -158,7 +202,7 @@ void exit() //slet alt fra database, og gem resultatet til sidst.
   {
     db.execute("DELETE FROM HjerteData");
  
-   db.execute("INSERT INTO HjerteData VALUES (" + tidsMultiplier + ", " + hjerte.stoffer.get(0).vaerdi + ", " + hjerte.stoffer.get(1).vaerdi + ")");
+   db.execute("INSERT INTO HjerteData VALUES (" + tidsMultiplier + ", " + hjerte.stoffer.get(0).vaerdi + ", " + hjerte.stoffer.get(1).vaerdi + ", " + kondiVaerdi + ")");
  
   }
   
@@ -171,10 +215,18 @@ void exit() //slet alt fra database, og gem resultatet til sidst.
 void draw()
 {
   clear();
+ 
+  textFont(font);
+  
   hjerte.Draw();
   sideskiftKnap.Draw(true);
   
   genstartKnap.Draw(true);
+  
+  BPMInfoKnap.Draw();
+  MMHGInfoKnap.Draw();
+  
+  
   
   push();
   textAlign(CENTER);
@@ -182,6 +234,19 @@ void draw()
   tidsKnap1.Draw(true);
   tidsKnap2.Draw(true);
   pop();
+  
+  if(kondiVaerdi == 0)
+  {
+    hjerte.hvilePuls = daarligKondiPuls;
+  }
+  else if(kondiVaerdi == 1)
+  {
+    hjerte.hvilePuls = middelKondiPuls;
+  }
+  else if(kondiVaerdi == 2)
+  {
+    hjerte.hvilePuls = godKondiPuls;
+  }
   
   if(mainSide)
   {
@@ -253,12 +318,68 @@ void draw()
     push();
       textAlign(LEFT);
       textSize(dataTextFontSize);
+      String s = "";
+      if(kondiVaerdi == 0)
+      {
+        s = "Dårlig";
+      }
+      else if(kondiVaerdi == 1)
+      {
+        s = "Middel";
+      }
+      else if(kondiVaerdi == 2)
+      {
+        s = "God";
+      }
       
+      text("Kondi: " + s, dataStartPosition.x, dataStartPosition.y + dataTextSpacing * hjerte.stoffer.size());
       pop();
     
-    
+    kondiInfoKnap.Draw();
     
     boolean noButton = true;
+    
+    boolean anyFalse = false;
+      if(OnButton(kondiDaarligtInfo.knap))
+      {
+        //Indenfor infoKnap
+        inInfoKnap = true;
+        anyFalse = true;
+        infoTekst = kondiDaarligtInfoTekst;
+        noButton = false;
+      }
+      if(OnButton(kondiMiddelInfo.knap))
+      {
+        //Indenfor infoKnap
+        inInfoKnap = true;
+        anyFalse = true;
+        infoTekst = kondiMiddelInfoTekst;
+        noButton = false;
+      }
+      if(OnButton(kondiGodtInfo.knap))
+      {
+        //Indenfor infoKnap
+        inInfoKnap = true;
+        anyFalse = true;
+        infoTekst = kondiGodtInfoTekst;
+        noButton = false;
+      }
+  if(!anyFalse)
+  {
+   inInfoKnap = false;
+   infoTekst = "";
+  }
+    
+    kondiDaarligt.Draw(!inInfoKnap);
+    kondiDaarligtInfo.Draw();
+    
+    kondiMiddel.Draw(!inInfoKnap);
+    kondiMiddelInfo.Draw();
+    
+    kondiGodt.Draw(!inInfoKnap);
+    kondiGodtInfo.Draw();
+    
+    
     
     for(int i = 0; i < dataInfoKnappe.size(); i++)
     {
@@ -271,11 +392,46 @@ void draw()
       } 
     }
     
+    if(OnButton(kondiInfoKnap.knap))
+    {
+      //Indenfor dataInfoKnap        
+        infoTekst = kondiInfoKnapTekst;
+        noButton = false;
+    }
+    
     if(noButton)
     {
       infoTekst = "";
     }
     
+    if(kondiVaerdi == 0)
+    {
+      kondiDaarligt.permaActivated = true;
+      kondiMiddel.permaActivated = false;
+      kondiGodt.permaActivated = false;
+    }
+    else if(kondiVaerdi == 1)
+    {
+      kondiDaarligt.permaActivated = false;
+      kondiMiddel.permaActivated = true;
+      kondiGodt.permaActivated = false;
+    }
+    else if(kondiVaerdi == 2)
+    {
+      kondiDaarligt.permaActivated = false;
+      kondiMiddel.permaActivated = false;
+      kondiGodt.permaActivated = true;
+    }
+    
+  }
+  
+  if(OnButton(BPMInfoKnap.knap))
+  {
+    infoTekst = BPMInfoKnap.tekst;
+  }
+  if(OnButton(MMHGInfoKnap.knap))
+  {
+    infoTekst = MMHGInfoKnap.tekst;
   }
   
   if(infoTekst != "")
@@ -317,6 +473,8 @@ void mouseClicked()
    //genstart
    
    tidsMultiplier = 1;
+   
+   kondiVaerdi = 1;
    
    for(int i = 0; i < hjerte.stoffer.size(); i++)
    {
@@ -383,7 +541,20 @@ void mouseClicked()
         sideskiftKnap.tekst = "Info";
       } 
       
+      if(OnButton(kondiDaarligt))
+      {
+        kondiVaerdi = 0;
+      }
       
+      if(OnButton(kondiMiddel))
+      {
+        kondiVaerdi = 1;
+      }
+      
+      if(OnButton(kondiGodt))
+      {
+        kondiVaerdi = 2;
+      }
       
   }
   
