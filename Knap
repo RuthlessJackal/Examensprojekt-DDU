@@ -4,12 +4,17 @@ class Knap
   PVector dimensions;
   PVector position;
   String tekst;
-  color defaultColor = color(255, 255, 255);
+  color defaultColor = color(255,84,84);
   color activatedColor = color(150, 150, 150);
   int font = 32;
   boolean permaActivated;
   
-  public Knap(String tekst, PVector dimensions, PVector position)
+  boolean infoKnap = false;
+  
+  color defaultColorInfo = color(255,255,255);
+  color activatedColorInfo = color(200,200,200);
+  
+  public Knap(String tekst, PVector dimensions, PVector position, boolean infoKnap)
   {
     this.dimensions = dimensions;
     this.position = position;
@@ -17,14 +22,27 @@ class Knap
     
     permaActivated = false;
     
+    if (infoKnap == true)
+    {
+      defaultColor = defaultColorInfo;
+      activatedColor = activatedColorInfo;
+    }
+    
   }
   
-  public Knap(String tekst, PVector dimensions, PVector position, int font)
+  public Knap(String tekst, PVector dimensions, PVector position, int font, boolean infoKnap)
   {
     this.dimensions = dimensions;
     this.position = position;
     this.tekst = tekst;
     this.font = font;
+    
+    if (infoKnap == true)
+    {
+      defaultColor = defaultColorInfo;
+      activatedColor = activatedColorInfo;
+    }
+    
     
     permaActivated = false;
     
