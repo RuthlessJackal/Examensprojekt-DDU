@@ -6,7 +6,7 @@ class InfoKnap
   public InfoKnap(String tekst, PVector pos, PVector dimensions)
   {
     this.tekst = tekst;
-    knap = new Knap("i", dimensions, pos, 24);
+    knap = new Knap("i", dimensions, pos, 24, true);
     
   }
   
