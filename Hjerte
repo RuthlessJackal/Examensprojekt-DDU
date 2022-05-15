@@ -5,14 +5,18 @@ class Hjerte
   float hvileSys;
   float hvileDia;
   
+  int brugsPuls;
+  
 float puls;
 float diaTryk;
 float sysTryk;
 PVector pos;
 
+Boolean doed = false;
+
 ArrayList<Stof> stoffer = new ArrayList<Stof>();
 
-PShape s;
+PShape hjerte;
 
 boolean loeber;
 float loebeTimer;
@@ -24,11 +28,12 @@ boolean sysDiaLoeb;
 
   public Hjerte(PVector pos, float hvilePuls, float hvileSys, float hvileDia)
   {
-    s = loadShape("heart2.obj");
+    hjerte = loadShape("heart2.obj");
     
     puls = 80;
     diaTryk = 70;
     sysTryk = 110;
+    brugsPuls = int(puls);
     
     this.pos = pos;
     
@@ -46,10 +51,7 @@ boolean sysDiaLoeb;
     this.hvilePuls = hvilePuls;
     this.hvileSys = hvileSys;
     this.hvileDia = hvileDia;
-    
-    
-    
-}
+  }
   
   void UpdateData(float multiplier)
   {
@@ -167,7 +169,8 @@ boolean sysDiaLoeb;
     float tempV = 0;
     
     tempV += stoffer.get(0).vaerdi * 1.5; // Alkohol/Genstande 
-    tempV += (-(stoffer.get(1).vaerdi * stoffer.get(1).vaerdi) * 0.53 + 10.67 * stoffer.get(1).vaerdi) * 0.1; // Nikotin/Cigaretter 
+    tempV += (-(stoffer.get(1).vaerdi * stoffer.get(1).vaerdi) * 0.114 + 5.143 * stoffer.get(1).vaerdi); // Nikotin/Cigaretter 
+    
     
     return tempV;
   }
@@ -298,22 +301,54 @@ boolean sysDiaLoeb;
     push();
     
     lights();
-    background(0);
-  
-    camera(pos.x, pos.y, ((height/2.0)-300-pow((sin(radians(frameCount*12*puls/60))+sin(radians(frameCount*12*puls/60)-1.45)*sin(radians(frameCount*12*puls/60))),10)*2.2/(puls/60))-420, pos.x+150, pos.y+100, 0, 0, 1, 0);
-     
+    ambientLight(255, 0, 0);
+    
+    if (frameCount % 45 == 0) //den brugte puls bliver opdateret hver 45-frame for at undgå problemer når pulsen ændre sig hurtigt
+    {
+     brugsPuls = int(puls); 
+    }
+    
+
+    if (stoffer.get(0).vaerdi + stoffer.get(1).vaerdi >= 45 || stoffer.get(1).vaerdi >= 40 || stoffer.get(0).vaerdi >= 15)  //kriterier for død
+    {
+      doed = true;
+     puls = 0;
+     brugsPuls = 0; 
+         camera(pos.x, pos.y, -330, pos.x+150, pos.y+100, 0, 0, 1, 0);
+    }
+    else
+    {
+      doed = false;
+    
+    if(brugsPuls == 0)
+    {
+      brugsPuls = int(puls);
+    }
+    
+    camera(pos.x, pos.y, ((height/2.0)-300-pow((sin(radians(frameCount*12*brugsPuls/60))+sin(radians(frameCount*12*brugsPuls/60)-1.45)*sin(radians(frameCount*12*brugsPuls/60))),10)*2.2/(brugsPuls/60))-420, pos.x+150, pos.y+100, 0, 0, 1, 0);
+    
+    }
+    
     translate(pos.x, pos.y);
     
-    stroke(255);
     noFill();
-    rotateZ(radians(180)); //rotate in the y-axis by passing the radians conversion of 45 degrees
+    rotateZ(radians(180));
     rotateY(radians(frameCount)/2);
    
-    shape(s, 0, 0);
+    shape(hjerte, 0, 0);
     pop();
     textSize(32);
     textAlign(CENTER);
+    
+    if (doed == false)
+    {
      text(round(puls) + " BPM", pos.x, pos.y + 100);
+    }
+    else
+    {
+     text(round(puls) + " BPM (DØD)", pos.x+40, pos.y + 100); 
+    }
+    
      text(RoundToDecimalPoints(sysTryk, 1) + "/" + RoundToDecimalPoints(diaTryk, 1) + " mmHG", pos.x, pos.y + 150);
     
   }
