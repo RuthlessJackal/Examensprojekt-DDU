@@ -1,4 +1,4 @@
-import de.bezier.data.sql.*;
+  import de.bezier.data.sql.*;
 SQLite db;
 
 Hjerte hjerte;
@@ -9,14 +9,12 @@ ArrayList<Knap> indgrebKnappe = new ArrayList<Knap>();
 //indgrebknappe variabler
 PVector knapDimensioner = new PVector(250,120);
 PVector knapSpacing = new PVector(300, 160);
-PVector startKnapPos = new PVector(50, 200);
+PVector startKnapPos = new PVector(50, 100);
 
 //Sideskiftknappe variabler
-PVector sideskiftKnapDimensioner = new PVector(knapDimensioner.x+knapSpacing.x,125);
+PVector sideskiftKnapDimensioner = new PVector(knapDimensioner.x+knapSpacing.x,120); //120 er ændret fra 125
 PVector sideskiftKnapPosition = new PVector(50,650);
 Knap sideskiftKnap;
-
-ArrayList<Preset> Presets = new ArrayList<Preset>();
 
 //Knap info UI variabler
 ArrayList<InfoKnap> infoKnappe = new ArrayList<InfoKnap>();
@@ -29,11 +27,11 @@ int infoTextFontSize = 32;
 PVector infoTextPos = new PVector(50,50);
 
 //data UI
-PVector dataStartPosition = new PVector(50, 250);
+PVector dataStartPosition = new PVector(90, 250);
 int dataTextFontSize = 30;
-int dataTextSpacing = 75;
+int dataTextSpacing = 100;
 ArrayList<InfoKnap> dataInfoKnappe = new ArrayList<InfoKnap>();
-int dataInfoKnappeXPos = 50;
+int dataInfoKnappeXPos = 90; //ændret fra 50
 
 ArrayList<String> dataInfoTekster = new ArrayList<String>();
 
@@ -49,18 +47,18 @@ float tidsMultiplier = 1;
 Knap tidsKnap1;
 Knap tidsKnap2;
 
-PVector tidsKnapPos = new PVector(890, 600);
+PVector tidsKnapPos = new PVector(890, 550); //ændret fra 890, 600
 PVector tidsKnapDimensioner = new PVector(50, 50);
 float tidsKnapSpacing = 20;
 
 //Genstartknap
 Knap genstartKnap;
 
-PVector genstartKnapPos = new PVector(855, 675);
-PVector genstartKnapDimensioner = new PVector(200, 100);
+PVector genstartKnapPos = new PVector(830, 650); //ændret fra 855, 675
+PVector genstartKnapDimensioner = new PVector(250, 120); //ændret fra 200, 100
 
 //kondi knappe
-PVector kondiKnappePos = new PVector(50, 210);
+PVector kondiKnappePos = new PVector(90, 210); //ændret fra 50, 210
 PVector kondiKnappeDimensioner = new PVector(100, 65);
 float kondiKnappeSpacing = 110;
 
@@ -123,7 +121,7 @@ void setup()
  
   db.close();
 
-  genstartKnap = new Knap("Genstart", genstartKnapDimensioner, genstartKnapPos);
+  genstartKnap = new Knap("Genstart", genstartKnapDimensioner, genstartKnapPos, false);
 
   //Database kode slut...
 
@@ -162,7 +160,7 @@ void setup()
     
     pos.y += knapSpacing.y * (i / 2);
     
-    indgrebKnappe.add(new Knap(a.navn, knapDimensioner, pos));
+    indgrebKnappe.add(new Knap(a.navn, knapDimensioner, pos, false));
     infoKnappe.add(new InfoKnap(infoTekster.get(i), new PVector(pos.x + knapDimensioner.x-(infoKnapDimensions.x+infoKnapSpacing), pos.y+infoKnapSpacing), infoKnapDimensions));
   }
 
@@ -171,21 +169,21 @@ void setup()
       dataInfoKnappe.add(new InfoKnap(dataInfoTekster.get(i), new PVector(dataInfoKnappeXPos - infoKnapDimensions.x - 10, dataStartPosition.y + dataTextSpacing * i - infoKnapDimensions.y  ), infoKnapDimensions));
     }
 
-   sideskiftKnap = new Knap("Info", sideskiftKnapDimensioner, sideskiftKnapPosition);
+   sideskiftKnap = new Knap("Info", sideskiftKnapDimensioner, sideskiftKnapPosition, true);
 
-    tidsKnap1 = new Knap("<", tidsKnapDimensioner, tidsKnapPos);
-    tidsKnap2 = new Knap(">", tidsKnapDimensioner, new PVector(tidsKnapPos.x + tidsKnapDimensioner.x + tidsKnapSpacing, tidsKnapPos.y));
+    tidsKnap1 = new Knap("<", tidsKnapDimensioner, tidsKnapPos, false);
+    tidsKnap2 = new Knap(">", tidsKnapDimensioner, new PVector(tidsKnapPos.x + tidsKnapDimensioner.x + tidsKnapSpacing, tidsKnapPos.y), false);
 
     PVector kondiInfoKnapDimensioner = new PVector(20, 20);
     PVector kondiInfoKnapOffset = new PVector(3, 3);
 
-    kondiDaarligt = new Knap("Dårlig", kondiKnappeDimensioner, new PVector(kondiKnappePos.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18);
+    kondiDaarligt = new Knap("Dårlig", kondiKnappeDimensioner, new PVector(kondiKnappePos.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18, false);
     kondiDaarligtInfo = new InfoKnap("i", new PVector(kondiKnappePos.x + kondiInfoKnapOffset.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size() + kondiInfoKnapOffset.y), kondiInfoKnapDimensioner);
     
-    kondiMiddel = new Knap("Middel", kondiKnappeDimensioner, new PVector(kondiKnappePos.x + kondiKnappeSpacing, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18);
+    kondiMiddel = new Knap("Middel", kondiKnappeDimensioner, new PVector(kondiKnappePos.x + kondiKnappeSpacing, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18, false);
     kondiMiddelInfo = new InfoKnap("i", new PVector(kondiKnappePos.x + kondiKnappeSpacing + kondiInfoKnapOffset.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size() + kondiInfoKnapOffset.y), kondiInfoKnapDimensioner);
     
-    kondiGodt = new Knap("God", kondiKnappeDimensioner, new PVector(kondiKnappePos.x + kondiKnappeSpacing * 2, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18);
+    kondiGodt = new Knap("God", kondiKnappeDimensioner, new PVector(kondiKnappePos.x + kondiKnappeSpacing * 2, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size()), 18, false);
     kondiGodtInfo = new InfoKnap("i", new PVector(kondiKnappePos.x + kondiKnappeSpacing * 2 + kondiInfoKnapOffset.x, kondiKnappePos.y + dataTextSpacing * hjerte.stoffer.size() + kondiInfoKnapOffset.y), kondiInfoKnapDimensioner);
     
     kondiInfoKnap = new InfoKnap("i", new PVector(dataInfoKnappeXPos - infoKnapDimensions.x - 10, dataStartPosition.y + dataTextSpacing * dataInfoTekster.size() - infoKnapDimensions.y  ), infoKnapDimensions);
@@ -215,10 +213,13 @@ void exit() //slet alt fra database, og gem resultatet til sidst.
 void draw()
 {
   clear();
+  
+  background(84,192,255);
  
   textFont(font);
   
   hjerte.Draw();
+  
   sideskiftKnap.Draw(true);
   
   genstartKnap.Draw(true);
@@ -436,15 +437,51 @@ void draw()
   
   if(infoTekst != "")
   {
+    
+    //boks tegnes bag infotekst
     push();
+    
+    translate(0,0,1); //placere det forrest
+    
+    fill(255,150,150);
+        
+    if(infoTekst.length() < 50)
+    {
+      rect(0,0,820,80);
+    }
+    if(infoTekst.length() < 100 && infoTekst.length() > 50)
+    {
+      rect(0,0,820,140);
+    }
+    if(infoTekst.length() > 100)
+    {
+      rect(0,0,820,200);
+    }
+    
+    
+    
+    
+    pop();
+
+    
+    //infotekst tegnes
+    push();
+    
+    translate(0,0,1); //placere det ovenpå
     
     textAlign(LEFT);
     textSize(infoTextFontSize);
-    text(infoTekst, infoTextPos.x, infoTextPos.y);
+    
+    text(infoTekst, infoTextPos.x, infoTextPos.y);    
+    
+    
     
     pop();
+    
+    
+    
   }
-   
+  
 }
 
 float RoundToDecimalPoints(float x, int n)
@@ -468,6 +505,7 @@ boolean OnButton(Knap a)
 
 void mouseClicked()
 {
+  
   if(OnButton(genstartKnap))
   {
    //genstart
